@@ -21,7 +21,7 @@ exports.getOneProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: "/product",
-      }),
+      })
     )
     .catch((err) => console.log(err));
 };
@@ -44,7 +44,7 @@ exports.getCart = (req, res, next) => {
       const cartProducts = [];
       for (product of products) {
         const cartProductData = cart.products.find(
-          (prod) => prod.id === product.id,
+          (prod) => prod.id === product.id
         );
         if (cartProductData) {
           cartProducts.push({
