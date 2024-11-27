@@ -4,7 +4,7 @@ const path = require("path");
 const p = path.join(
   path.dirname(process.mainModule.filename),
   "data",
-  "cart.json"
+  "cart.json",
 );
 
 module.exports = class Cart {
@@ -20,7 +20,7 @@ module.exports = class Cart {
       // analyze the cart => find the existing products
       let updatedProduct;
       const existingProductIndex = cart.products.findIndex(
-        (prod) => prod.id === id
+        (prod) => prod.id === id,
       );
       const existingProduct = cart.products[existingProductIndex];
       // add new products / increase quantity
@@ -45,14 +45,14 @@ module.exports = class Cart {
       }
       const updatedCart = { ...JSON.parse(data) };
       const toBeDeletedProduct = updatedCart.products.find(
-        (prod) => prod.id === id
+        (prod) => prod.id === id,
       );
       if (!toBeDeletedProduct) {
         return;
       }
       const toBeDeletedProductQuantity = toBeDeletedProduct.quantity;
       updatedCart.products = updatedCart.products.filter(
-        (prod) => prod.id !== id
+        (prod) => prod.id !== id,
       );
       updatedCart.totalPrice =
         updatedCart.totalPrice - productPrice * toBeDeletedProductQuantity;
