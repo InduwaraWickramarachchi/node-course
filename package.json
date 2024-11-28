@@ -20,6 +20,7 @@
     "ejs": "^3.1.10",
     "express": "^4.16.3",
     "express-handlebars": "^8.0.1",
+    "mongodb": "^6.11.0",
     "mysql2": "^3.11.4",
     "prettier": "^3.4.1",
     "pug": "^3.0.3",
