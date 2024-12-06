@@ -1,35 +1,43 @@
-const path = require("path");
+import express from "express";
 
-const express = require("express");
-const bodyParser = require("body-parser");
+import { fileURLToPath } from "url";
 
-const sequelize = require("./util/dataBase");
+import { join } from "path";
+import path from "path";
 
-const Product = require("./models/product");
+import { get404 } from "./controllers/error.js";
+import { mongoConnect } from "./util/database.js";
 
-const User = require("./models/user");
+import adminRoutes from "./routes/admin.js";
+import shopRoutes from "./routes/shop.js";
+import User from "./models/user.js";
 
-const errorController = require("./controllers/error");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
-const adminRoutes = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
+app.use(express.urlencoded({ extended: false }));
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(join(__dirname, "public")));
+
+app.use((req, res, next) => {
+  User.findById("6749fbdeb765eabdaef36dd0")
+    .then((user) => {
+      req.user = new User(user.username, user.email, user.cart, user._id);
+      next();
+    })
+    .catch((err) => console.log(err));
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
-app.use(errorController.get404);
+app.use(get404);
 
-sequelize
-  .sync()
-  .then((results) => {
-    app.listen(3000);
-  })
-  .catch((err) => console.log(err));
+mongoConnect(() => {
+  app.listen(3000);
+});
