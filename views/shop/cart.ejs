@@ -9,11 +9,11 @@
                 <ul class="cart__item-list">
                     <% products.forEach(product => { %>
                         <li class="cart__item">
-                            <h3><%= product.title %></h3>
+                            <h3><%= product.productId.title %></h3>
                             <h3>Quantity: <%= product.quantity %></h3>
                             <form action="/cart-delete-item" method="post">
                                 <button class="cart__btn" type="submit">Delete</button>
-                                <input type="hidden" value="<%= product._id %>" name="productId">
+                                <input type="hidden" value="<%= product.productId._id %>" name="productId">
                             </form>
                         </li>
                         <%}) %>
