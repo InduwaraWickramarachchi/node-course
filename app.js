@@ -1,35 +1,57 @@
-const path = require("path");
+import express from "express";
+import { fileURLToPath } from "url";
+import { join } from "path";
+import path from "path";
+import { get404 } from "./controllers/error.js";
+import adminRoutes from "./routes/admin.js";
+import shopRoutes from "./routes/shop.js";
+import User from "./models/user.js";
+import mongoose from "mongoose";
 
-const express = require("express");
-const bodyParser = require("body-parser");
-
-const sequelize = require("./util/dataBase");
-
-const Product = require("./models/product");
-
-const User = require("./models/user");
-
-const errorController = require("./controllers/error");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
-const adminRoutes = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
+app.use(express.urlencoded({ extended: false }));
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(join(__dirname, "public")));
+
+app.use((req, res, next) => {
+  User.findById("67566200565f4670f13a12fc")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
-app.use(errorController.get404);
+app.use(get404);
 
-sequelize
-  .sync()
-  .then((results) => {
+mongoose
+  .connect("mongodb://localhost:27017/node-course")
+  .then(() => {
+    console.log("Connected to the database!!");
+
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          username: "Si5",
+          email: "test@gmail.com",
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
+
     app.listen(3000);
   })
   .catch((err) => console.log(err));

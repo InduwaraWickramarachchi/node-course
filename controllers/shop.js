@@ -1,8 +1,8 @@
-const Product = require("../models/product");
-const Cart = require("../models/cart");
+import Product from "../models/product.js";
+import Order from "../models/order.js";
 
-exports.getProducts = (req, res, next) => {
-  Product.findAll()
+export function getProducts(req, res, next) {
+  Product.find()
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
@@ -11,11 +11,11 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => console.log(err));
-};
+}
 
-exports.getOneProduct = (req, res, next) => {
+export function getOneProduct(req, res, next) {
   const prodID = req.params.productId;
-  Product.findByPk(prodID)
+  Product.findById(prodID)
     .then((product) =>
       res.render("shop/product-detail", {
         product: product,
@@ -24,10 +24,10 @@ exports.getOneProduct = (req, res, next) => {
       }),
     )
     .catch((err) => console.log(err));
-};
+}
 
-exports.getIndex = (req, res, next) => {
-  Product.findAll()
+export function getIndex(req, res, next) {
+  Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
@@ -36,58 +36,81 @@ exports.getIndex = (req, res, next) => {
       });
     })
     .catch((err) => console.log(err));
-};
+}
 
-exports.getCart = (req, res, next) => {
-  Cart.getCartProducts((cart) => {
-    Product.fetchAllProducts((products) => {
-      const cartProducts = [];
-      for (product of products) {
-        const cartProductData = cart.products.find(
-          (prod) => prod.id === product.id,
-        );
-        if (cartProductData) {
-          cartProducts.push({
-            productData: product,
-            quantity: cartProductData.quantity,
-          });
-        }
-      }
+export function getCart(req, res, next) {
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
-        products: cartProducts,
+        products: user.cart.items,
       });
+    })
+    .catch((err) => console.log(err));
+}
+
+export function postCart(req, res, next) {
+  const prodId = req.body.productId;
+  Product.findById(prodId)
+    .then((product) => {
+      return req.user.addToCart(product);
+    })
+    .then()
+    .catch((err) => console.log(err));
+  res.redirect("/cart");
+}
+
+export function PostCartDeleteProduct(req, res, next) {
+  const prodId = req.body.productId;
+  req.user
+    .removeItemFromCart(prodId)
+    .then(res.redirect("/cart"))
+    .catch((err) => console.log(err));
+}
+
+export function postOrders(req, res, next) {
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items.map((item) => {
+        return { product: { ...item.productId._doc }, quantity: item.quantity };
+      });
+
+      const order = new Order({
+        user: {
+          userId: req.user,
+          username: req.user.username,
+        },
+        products: products,
+      });
+      return order.save();
+    })
+    .then(() => {
+      return req.user.clearCart();
+    })
+    .then(() => {
+      res.redirect("/orders");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+export function getOrders(req, res, next) {
+  Order.find({ "user.userId": req.user._id }).then((orders) => {
+    res.render("shop/orders", {
+      path: "/orders",
+      pageTitle: "Your Orders",
+      orders: orders,
     });
   });
-};
+}
 
-exports.postCart = (req, res, next) => {
-  const prodId = req.body.productId;
-  Product.findById(prodId, (product) => {
-    Cart.addProductToCart(prodId, product.price);
-  });
-  res.redirect("/cart");
-};
-
-exports.PostCartDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId;
-  Product.findById(prodId, (prod) => {
-    Cart.deleteProductFromCart(prodId, prod.price);
-    res.redirect("/cart");
-  });
-};
-
-exports.getOrders = (req, res, next) => {
-  res.render("shop/orders", {
-    path: "/orders",
-    pageTitle: "Your Orders",
-  });
-};
-
-exports.getCheckout = (req, res, next) => {
+export function getCheckout(req, res, next) {
   res.render("shop/checkout", {
     path: "/checkout",
     pageTitle: "Checkout",
   });
-};
+}
