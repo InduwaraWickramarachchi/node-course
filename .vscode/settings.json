@@ -1,3 +1,4 @@
 {
-  "conventionalCommits.scopes": ["full-stack"]
+  "conventionalCommits.scopes": ["full-stack"],
+  "cSpell.words": ["resave"]
 }

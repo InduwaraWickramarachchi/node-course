@@ -1,10 +1,10 @@
-import { ObjectId } from "mongodb";
 import Product from "../models/product.js";
 export function getAddProduct(req, res, next) {
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
+    isAuthenticated: req.session.isLoggedIn,
   });
 }
 
@@ -45,6 +45,7 @@ export function getEditProduct(req, res, next) {
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -82,6 +83,7 @@ export function getProducts(req, res, next) {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
