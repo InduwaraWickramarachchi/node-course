@@ -10,6 +10,7 @@ import {
   getOrders,
   postOrders,
 } from "../controllers/shop.js";
+import isAuth from "../middileware/is-auth.js";
 
 const router = Router();
 
@@ -19,15 +20,15 @@ router.get("/products", getProducts);
 
 router.get("/products/:productId", getOneProduct);
 
-router.get("/cart", getCart);
+router.get("/cart", isAuth, getCart);
 
-router.post("/cart", postCart);
+router.post("/cart", isAuth, postCart);
 
-router.post("/cart-delete-item", PostCartDeleteProduct);
+router.post("/cart-delete-item", isAuth, PostCartDeleteProduct);
 
-router.post("/create-order", postOrders);
+router.post("/create-order", isAuth, postOrders);
 
-router.get("/orders", getOrders);
+router.get("/orders", isAuth, getOrders);
 
 // router.get("/checkout", shopController.getCheckout);
 
