@@ -26,6 +26,7 @@
                     <% if(editing) { %><%= product.description %><% } %>
                 </textarea>
             </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
             <% if(editing) { %>
                     <input type="hidden" value="<%= product._id %>" name="productId" >
                 <% } %>
