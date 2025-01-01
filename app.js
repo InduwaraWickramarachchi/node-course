@@ -9,8 +9,9 @@ import authRoutes from "./routes/auth.js";
 import User from "./models/user.js";
 import mongoose from "mongoose";
 import session from "express-session";
-// const MongoStore = require("connect-mongodb-session")(session);
 import ConnectMongoDBSession from "connect-mongodb-session";
+import csurf from "csurf";
+import flash from "connect-flash";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,10 @@ app.use(
   }),
 );
 
+app.use(csurf());
+
+app.use(flash());
+
 app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
@@ -53,6 +58,12 @@ app.use((req, res, next) => {
     .catch((err) => console.log(err));
 });
 
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -63,19 +74,6 @@ mongoose
   .connect(MONGODB_URI)
   .then(() => {
     console.log("Connected to the database!!");
-
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          username: "Si5",
-          email: "test@gmail.com",
-          cart: {
-            items: [],
-          },
-        });
-        user.save();
-      }
-    });
 
     app.listen(3000);
   })
