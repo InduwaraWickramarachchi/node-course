@@ -1,4 +1,5 @@
 import Product from "../models/product.js";
+
 export function getAddProduct(req, res, next) {
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
@@ -58,22 +59,25 @@ export function postEditProduct(req, res, next) {
 
   Product.findById(prodId)
     .then((product) => {
+      if (product.userId.toString() !== req.user._id.toString()) {
+        return res.redirect("/");
+      }
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDescription;
       product.imageUrl = updatedImageIrl;
 
-      return product.save();
+      return product.save().then(() => {
+        console.log("PRODUCT UPDATED!");
+        res.redirect("/admin/products");
+      });
     })
-    .then(() => {
-      console.log("PRODUCT UPDATED!");
-      res.redirect("/admin/products");
-    })
+
     .catch((err) => console.log(err));
 }
 
 export function getProducts(req, res, next) {
-  Product.find()
+  Product.find({ userId: req.user._id })
     // .select("title price")
     // .populate("userId", "username email")
     .then((products) => {
@@ -88,7 +92,7 @@ export function getProducts(req, res, next) {
 
 export function postDeleteProduct(req, res, next) {
   const prodId = req.body.productId;
-  Product.findByIdAndDelete(prodId)
+  Product.deleteOne({ _id: prodId, userId: req.user._id })
     .then(() => {
       res.redirect("/admin/products");
     })
