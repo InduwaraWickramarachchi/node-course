@@ -22,7 +22,7 @@ export function postAddProduct(req, res, next) {
   if (!errors.isEmpty()) {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
-      path: "/admin/edit-product",
+      path: "/admin/add-product",
       editing: false,
       hasError: true,
       errorMessage: errors.array()[0].msg,
@@ -49,7 +49,11 @@ export function postAddProduct(req, res, next) {
       console.log("Product Created!");
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function getEditProduct(req, res, next) {
@@ -73,7 +77,11 @@ export function getEditProduct(req, res, next) {
         validationErrors: [],
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function postEditProduct(req, res, next) {
@@ -118,7 +126,11 @@ export function postEditProduct(req, res, next) {
       });
     })
 
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function getProducts(req, res, next) {
@@ -132,7 +144,11 @@ export function getProducts(req, res, next) {
         path: "/admin/products",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function postDeleteProduct(req, res, next) {
@@ -141,5 +157,9 @@ export function postDeleteProduct(req, res, next) {
     .then(() => {
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
