@@ -10,7 +10,11 @@ export function getProducts(req, res, next) {
         path: "/products",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function getOneProduct(req, res, next) {
@@ -21,9 +25,13 @@ export function getOneProduct(req, res, next) {
         product: product,
         pageTitle: product.title,
         path: "/product",
-      }),
+      })
     )
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function getIndex(req, res, next) {
@@ -35,7 +43,11 @@ export function getIndex(req, res, next) {
         path: "/",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function getCart(req, res, next) {
@@ -48,7 +60,11 @@ export function getCart(req, res, next) {
         products: user.cart.items,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function postCart(req, res, next) {
@@ -57,9 +73,14 @@ export function postCart(req, res, next) {
     .then((product) => {
       return req.user.addToCart(product);
     })
-    .then()
-    .catch((err) => console.log(err));
-  res.redirect("/cart");
+    .then(() => {
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function PostCartDeleteProduct(req, res, next) {
@@ -67,7 +88,11 @@ export function PostCartDeleteProduct(req, res, next) {
   req.user
     .removeItemFromCart(prodId)
     .then(res.redirect("/cart"))
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 }
 
 export function postOrders(req, res, next) {
@@ -94,7 +119,9 @@ export function postOrders(req, res, next) {
       res.redirect("/orders");
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 }
 
