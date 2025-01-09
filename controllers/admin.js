@@ -1,3 +1,4 @@
+import { validationResult } from "express-validator";
 import Product from "../models/product.js";
 
 export function getAddProduct(req, res, next) {
@@ -5,6 +6,9 @@ export function getAddProduct(req, res, next) {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
+    hasError: false,
+    errorMessage: null,
+    validationErrors: [],
   });
 }
 
@@ -13,6 +17,25 @@ export function postAddProduct(req, res, next) {
   const price = req.body.price;
   const description = req.body.description;
   const imageUrl = req.body.imageUrl;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/edit-product",
+      editing: false,
+      hasError: true,
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+      product: {
+        title: title,
+        price: price,
+        imageUrl: imageUrl,
+        description: description,
+      },
+    });
+  }
+
   const product = new Product({
     title: title,
     price: price,
@@ -45,6 +68,9 @@ export function getEditProduct(req, res, next) {
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
+        hasError: false,
+        errorMessage: null,
+        validationErrors: [],
       });
     })
     .catch((err) => console.log(err));
@@ -54,8 +80,27 @@ export function postEditProduct(req, res, next) {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageIrl = req.body.imageUrl;
+  const updatedImageUrl = req.body.imageUrl;
   const updatedDescription = req.body.description;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/edit-product",
+      editing: false,
+      hasError: true,
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+      product: {
+        title: updatedTitle,
+        price: updatedPrice,
+        imageUrl: updatedImageUrl,
+        description: updatedDescription,
+        _id: prodId,
+      },
+    });
+  }
 
   Product.findById(prodId)
     .then((product) => {
@@ -65,7 +110,7 @@ export function postEditProduct(req, res, next) {
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDescription;
-      product.imageUrl = updatedImageIrl;
+      product.imageUrl = updatedImageUrl;
 
       return product.save().then(() => {
         console.log("PRODUCT UPDATED!");
