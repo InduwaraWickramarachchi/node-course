@@ -28,7 +28,7 @@ router.post(
       .isLength({ min: 3 })
       .withMessage("Title should be at least 3 characters!")
       .trim(),
-    body("imageUrl").isURL().withMessage("Image Url must be valid!"),
+    // body("imageUrl").isURL().withMessage("Image Url must be valid!"),
     body("price").isFloat().withMessage("Price must be valid!"),
     body("description")
       .isLength({ min: 5 })
@@ -46,7 +46,7 @@ router.post(
   "/edit-product",
   [
     body("title").isString().isLength({ min: 3 }).trim(),
-    body("imageUrl").isURL(),
+    // body("imageUrl").isURL(),
     body("price").isFloat(),
     body("description").isLength({ min: 5 }).trim(),
   ],
