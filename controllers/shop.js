@@ -1,16 +1,34 @@
 import Product from "../models/product.js";
 import Order from "../models/order.js";
-import { createReadStream, createWriteStream, readFile } from "fs";
+import { createWriteStream, readFile } from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
 
+const ITEMS_PER_PAGE = 2;
+
 export function getProducts(req, res, next) {
+  const page = +req.query.page || 1;
+  let totalItems;
   Product.find()
+    .countDocuments()
+    .then((numOfProducts) => {
+      totalItems = numOfProducts;
+
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
       });
     })
     .catch((err) => {
@@ -38,12 +56,28 @@ export function getOneProduct(req, res, next) {
 }
 
 export function getIndex(req, res, next) {
+  const page = +req.query.page || 1;
+  let totalItems;
   Product.find()
+    .countDocuments()
+    .then((numOfProducts) => {
+      totalItems = numOfProducts;
+
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
       });
     })
     .catch((err) => {
@@ -197,11 +231,6 @@ export function getInvoice(req, res, next) {
       pdfDoc.fontSize(18).text(`Total Price: $${totalPrice}`);
 
       pdfDoc.end();
-
-      // const fileStream = createReadStream(invoicePath);
-      // res.setHeader("Content-Type", "application/pdf");
-      // res.setHeader("Content-Disposition", `inline; filename="${invoiceName}"`);
-      // fileStream.pipe(res);
 
       fileStream.on("error", (err) => {
         next(new Error("Error reading the file!"));
